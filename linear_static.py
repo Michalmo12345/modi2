@@ -1,7 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
-from modi1 import u_train, u_test, y_train, y_test
+from initial import u_train, u_test, y_train, y_test
 
 def linear_train():
     m_matrix = np.vstack([np.ones(len(u_train)), u_train]).T

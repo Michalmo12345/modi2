@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 import numpy as np
 
-data = pd.read_csv('danestat18.txt', delimiter=r"\s+", header=None, names=['U', 'Y'])
+data = pd.read_csv('data/danestat18.txt', delimiter=r"\s+", header=None, names=['U', 'Y'])
 
 u_data = data['U']
 y_data = data['Y']

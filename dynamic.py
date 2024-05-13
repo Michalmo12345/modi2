@@ -3,8 +3,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-data_train = pd.read_csv('danedynucz18.txt', delimiter=r"\s+", header=None, names=['U', 'Y'])
-data_test = pd.read_csv('danedynwer18.txt', delimiter=r"\s+", header=None, names=['U', 'Y'])
+data_train = pd.read_csv('data/danedynucz18.txt', delimiter=r"\s+", header=None, names=['U', 'Y'])
+data_test = pd.read_csv('data/danedynwer18.txt', delimiter=r"\s+", header=None, names=['U', 'Y'])
 
 
 u_data_train = data_train['U']
