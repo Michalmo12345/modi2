@@ -178,11 +178,76 @@ def plot_split(y_mod_train,y_mod_test, y_mod_rec_train, y_mod_rec_test, title):
 
 
 
-def calculate_non_linear_model(n, degree):
-    pass 
+def create_m_matrix(n, degree, u_data, y_data):
+    num_samples = len(u_data) - n
+    num_features = degree * n * 2
+    feature_matrix = np.zeros((num_samples, num_features))
+    for i in range(num_samples):
+        feature_row = []
+        k = i + n
+
+        for lag in range(1, n + 1):
+            for power in range(1, degree + 1):
+                feature_row.append(u_data[k - lag] ** power)
+
+        for lag in range(1, n + 1):
+            for power in range(1, degree + 1):
+                feature_row.append(y_data[k - lag] ** power)
+
+        feature_matrix[i, :] = feature_row
+
+    return feature_matrix
+
+
+def non_liner_dynamic(n_row ,degree):
+    m_matrix_train = create_m_matrix(n_row, degree, u_train, y_train)
+    m_matrix_test = create_m_matrix(n_row, degree, u_test, y_test)
+    w_train = np.linalg.lstsq(m_matrix_train, y_train[n_row:], rcond=None)[0]
+    w_test = np.linalg.lstsq(m_matrix_test, y_test[n_row:], rcond=None)[0]
+    y_mod_train, y_mod_rec_train, y_mod_test, y_mod_rec_test = initialize_model_outputs(y_train, y_test, n_row)
+    # y_mod_train[n_row:] = np.dot(m_matrix_train, w_train)
+    # y_mod_test[n_row:] = np.dot(m_matrix_test, w_test)
+    
+    for k in range(n_row, len(y_train)):
+        for i in range(1, degree + 1):
+            y_mod_train[k] = w_train[i - 1] * u_train[k - 1] ** i + w_train[degree + i - 1] * y_train[k - 1] ** i
+            y_mod_rec_train[k] = w_train[i - 1] * u_train[k - 1] ** i + w_train[degree + i - 1] * y_mod_rec_train[k - 1] ** i
+
+    for k in range(n_row, len(y_test)):
+        for i in range(1, degree + 1):
+            y_mod_test[k] = w_test[i - 1] * u_test[k - 1] ** i + w_test[degree + i - 1] * y_test[k - 1] ** i
+            y_mod_rec_test[k] = w_test[i - 1] * u_test[k - 1] ** i + w_test[degree + i - 1] * y_mod_rec_test[k - 1] ** i
+
+    return y_mod_train, y_mod_test, y_mod_rec_train, y_mod_rec_test
+
+
+def calculate_non_linear_errors(n_row, degree):
+    results = {
+        'Degree': [], 
+        'Epsilon_train': [], 
+        'Epsilon_test': [],
+        'Epsilon_train_rec': [],
+        'Epsilon_test_rec': []}
+    for degree in range(1, degree + 1):
+        results['Degree'].append(degree)
+        y_mod_train, y_mod_test, y_mod_rec_train, y_mod_rec_test = non_liner_dynamic(n_row, degree)
+        epsilon_train = np.sum((y_mod_train - y_train) ** 2)
+        epsilon_test = np.sum((y_mod_test - y_test) ** 2)
+        epsilon_train_rec = np.sum((y_mod_rec_train - y_train) ** 2)
+        epsilon_test_rec = np.sum((y_mod_rec_test - y_test) ** 2)
+        results['Epsilon_train'].append(epsilon_train)
+        results['Epsilon_test'].append(epsilon_test)
+        results['Epsilon_train_rec'].append(epsilon_train_rec)
+        results['Epsilon_test_rec'].append(epsilon_test_rec)
+    df_results = pd.DataFrame(results)
+    return df_results
 
 # linear_dynamic_1_degree()
 # linear_dynamic_2_degree()
 # linear_dynamic_3_degree()
-df_results = calculate_dynamic_errors()
-print(df_results)
+# df_results = calculate_dynamic_errors()
+# print(df_results)
+non_linear_eps = calculate_non_linear_errors(2, 3)
+
+print(non_linear_eps)
+
