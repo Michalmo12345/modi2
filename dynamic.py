@@ -9,8 +9,8 @@ data_test = pd.read_csv('data/danedynwer18.txt', delimiter=r"\s+", header=None, 
 
 u_data_train = data_train['U']
 y_data_train = data_train['Y']
-u_data_test = data_train['U']
-y_data_test = data_train['Y']
+u_data_test = data_test['U']
+y_data_test = data_test['Y']
 u_train = np.array(u_data_train)
 u_test = np.array(u_data_test)
 y_train = np.array(y_data_train)
@@ -241,31 +241,48 @@ def non_liner_dynamic(n_row, degree):
 
     return epsilon_train, epsilon_test, epsilon_train_rec, epsilon_test_rec 
 
-def calculate_non_linear_errors(n_row, degree):
-    results = {
-        'Degree': [], 
-        'Epsilon_train': [], 
-        'Epsilon_test': [],
-        'Epsilon_train_rec': [],
-        'Epsilon_test_rec': []}
-    for degree in range(1, degree + 1):
-        results['Degree'].append(degree)
-        epsilon_train, epsilon_test, epsilon_train_rec, epsilon_test_rec = non_liner_dynamic(n_row, degree)
-        results['Epsilon_train'].append(epsilon_train)
-        results['Epsilon_test'].append(epsilon_test)
-        results['Epsilon_train_rec'].append(epsilon_train_rec)
-        results['Epsilon_test_rec'].append(epsilon_test_rec)
-    df_results = pd.DataFrame(results)
-    return df_results
+def calculate_non_linear_errors():
+    # degrees = ['drugi', 'trzeci', 'czwarty', 'piąty', 'szósty']
+    degrees  = list(range(9, 10))
+    dynamic_orders = list(range(13, 30))
 
+    columns = pd.MultiIndex.from_product([degrees, dynamic_orders], names=['Stopień:', 'Rząd dyn.'])
+
+    index = pd.MultiIndex.from_product([['Ucz', 'Wer'], ['Bez rek.', 'Z rek.']], names=['Dane:', 'Typ:'])
+
+
+    df = pd.DataFrame(np.nan, index=index, columns=columns)
+    for stopien, rzad in df.columns:
+        n_row = rzad
+        # degree_mapping = {'drugi': 2, 'trzeci': 3, 'czwarty': 4, 'piąty': 5, 'szósty': 6}
+        # degree = degree_mapping[stopien]
+        degree = stopien
+        epsilon_train, epsilon_test, epsilon_train_rec, epsilon_test_rec = non_liner_dynamic(n_row, degree)
+        
+        df.loc[('Ucz', 'Bez rek.'), (stopien, rzad)] = epsilon_train
+        df.loc[('Ucz', 'Z rek.'), (stopien, rzad)] = epsilon_train_rec
+        df.loc[('Wer', 'Bez rek.'), (stopien, rzad)] = epsilon_test
+        df.loc[('Wer', 'Z rek.'), (stopien, rzad)] = epsilon_test_rec
+
+    return df.round(2)
+
+def highlight_df(df):
+    return df.style.apply(lambda x: ['background: lightblue' if x.name[0] == 'Ucz' else '' for i in x], axis=1)
+# plot_train_split()
+# plot_test_split()
 # linear_dynamic_1_degree()
 # linear_dynamic_2_degree()
 # linear_dynamic_3_degree()
-# df_results = calculate_dynamic_errors()
-# df_results = df_results.round(3)
-# print(df_results)
-# df_results.to_csv('results/dynamic_errors.csv', index=False)
+df_results = calculate_dynamic_errors()
+df_results = df_results.round(3)
+print(df_results)
+df_results.to_csv('results/dynamic_errors.csv', index=False)
 # print(non_liner_dynamic(3,3))
-print(non_liner_dynamic(10,10))
+# print(non_liner_dynamic(10,10))
 # plot_train_split()
 # plot_test_split()
+# print(calculate_non_linear_errors())
+print(non_liner_dynamic(15, 9))
+# df = calculate_non_linear_errors()
+# print(df)
+# df.to_csv('results/non_linear_dynamic_errors_9.csv')
