@@ -1,0 +1,5 @@
+Rodzaj danych:,Wyznaczenie wartości:,N=1,N=2,N=3
+Dane uczące,Bez rekurecji,18.947,18.351,15.226
+Dane uczące,Z rekurecją,4039.851,3958.469,3695.216
+Dane weryfikujące,Bez rekurecji,18.947,18.351,15.226
+Dane weryfikujące,Z rekurecją,4039.851,6068.251,3695.216
