@@ -117,6 +117,30 @@ def initialize_model_outputs(y_train, y_test, degree):
     # plot_split(y_mod_train, y_mod_test, y_mod_rec_train, y_mod_rec_test)
     return y_mod_train, y_mod_rec_train, y_mod_test, y_mod_rec_test
 
+def characteritic_static_model(degree, n_row):
+    u = np.linspace(-1, 1, 1000)
+    columns = create_columns(n_row, degree, u_train, y_train)
+    m_matrix = np.column_stack(columns)
+    w = np.linalg.lstsq(m_matrix, y_train[n_row:], rcond=None)[0]
+    y = [0]  
+    y[:n_row] = y_train[:n_row]
+
+    for i in range(n_row-1, len(u)-1):
+        row = []
+        for j in range(n_row):
+            for k in range(1, degree+1):
+                row.append(u[i-j] ** k)
+                row.append(y[i-j] ** k)
+        temp = sum(w[idx] * value for idx, value in enumerate(row))
+        y.append(temp)
+    plt.figure(1)
+    plt.plot(u,y,linewidth=1.5)
+    plt.grid(True)
+    plt.xlabel("u")
+    plt.ylabel("y")
+    plt.title("Charakterystyka statyczna na podstawie najlepszego modelu dynamicznego")
+    plt.savefig(f'plots/characteristic_static_model_{degree}_{n_row}.png')
+    plt.show()
 
 def calculate_dynamic_errors():
     results = {
@@ -238,13 +262,13 @@ def non_liner_dynamic(n_row, degree):
     epsilon_test = np.sum((y_mod_test - y_test) ** 2)
     epsilon_train_rec = np.sum((y_mod_rec_train - y_train) ** 2)
     epsilon_test_rec = np.sum((y_mod_rec_test - y_test) ** 2)
-
+    
     return epsilon_train, epsilon_test, epsilon_train_rec, epsilon_test_rec 
 
 def calculate_non_linear_errors():
     # degrees = ['drugi', 'trzeci', 'czwarty', 'piąty', 'szósty']
-    degrees  = list(range(9, 10))
-    dynamic_orders = list(range(13, 30))
+    degrees  = list(range(7, 8))
+    dynamic_orders = list(range(13, 36))
 
     columns = pd.MultiIndex.from_product([degrees, dynamic_orders], names=['Stopień:', 'Rząd dyn.'])
 
@@ -273,16 +297,17 @@ def highlight_df(df):
 # linear_dynamic_1_degree()
 # linear_dynamic_2_degree()
 # linear_dynamic_3_degree()
-df_results = calculate_dynamic_errors()
-df_results = df_results.round(3)
-print(df_results)
-df_results.to_csv('results/dynamic_errors.csv', index=False)
-# print(non_liner_dynamic(3,3))
+# df_results = calculate_dynamic_errors()
+# df_results = df_results.round(3)
+# print(df_results)
+# df_results.to_csv('results/dynamic_errors.csv', index=False)
+# print(non_liner_dynamic(12,15))
 # print(non_liner_dynamic(10,10))
 # plot_train_split()
 # plot_test_split()
 # print(calculate_non_linear_errors())
-print(non_liner_dynamic(15, 9))
+# print(non_liner_dynamic(15, 9))
 # df = calculate_non_linear_errors()
 # print(df)
-# df.to_csv('results/non_linear_dynamic_errors_9.csv')
+# df.to_csv('results/non_linear_dynamic_errors_7_high.csv')
+characteritic_static_model(7,11)

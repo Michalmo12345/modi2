@@ -1,7 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
-from initial import u_train, u_test, y_train, y_test
+from initial import u_train, u_test, y_train, y_test, u_data, y_data
 
 
 def polynomial_train(degree):
@@ -13,6 +13,18 @@ def polynomial_train(degree):
 
     epsilon = np.sum((y_mod_train - y_train)**2)
     epsilon_test = np.sum((y_mod_test - y_test)**2)
+
+    m_matrix_whole_data = np.vstack([u_data**i for i in range(degree + 1)]).T
+    w_whole_data = np.linalg.lstsq(m_matrix_whole_data, y_data, rcond=None)[0]
+    y_mod_whole_data = sum(w_whole_data[i] * u_data**i for i in range(degree + 1))
+
+    plt.figure(figsize=(10, 6))
+    plt.title("Charakterystyka statycznego modelu nieliniowego - wielomian stopnia " + str(degree))
+    plt.scatter(u_data, y_mod_whole_data, color='blue', label='Model statyczny')
+    plt.xlabel('u')
+    plt.ylabel('y')
+    plt.grid(True)
+    plt.savefig(f'plots/polynomial_static_characteristic_{degree}.png')
 
     fig, axs = plt.subplots(1, 2, figsize=(16, 6))
 
@@ -56,4 +68,5 @@ def calculate_polynomial_errors(max_degree):
 
 
 # polynomial_train(15)
-print(calculate_polynomial_errors(15))
+# print(calculate_polynomial_errors(15))
+polynomial_train(2)

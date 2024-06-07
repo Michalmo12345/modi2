@@ -26,6 +26,17 @@ def linear():
     epsilon_test = sum((y_mod_test - y_test) ** 2)
     print(epsilon_test)
 
+    m_matrix_whole_data = np.vstack([np.ones(len(u_data)), u_data]).T
+    w_whole_data = np.linalg.lstsq(m_matrix_whole_data, y_data, rcond=None)[0]
+    y_mod_whole_data = w_whole_data[0] + w_whole_data[1] * u_data
+
+    plt.figure(figsize=(10, 6))
+    plt.title("Charakterystyka statycznego modelu liniowego")
+    plt.scatter(u_data, y_mod_whole_data, color='blue', label='Model statyczny')
+    plt.xlabel('u')
+    plt.ylabel('y')
+    plt.grid(True)
+    plt.savefig('plots/linear_static_characteristic.png')
 
     plt.figure(figsize=(10, 6))
     plt.title("Model statyczny liniowy na tle danych uczących")
